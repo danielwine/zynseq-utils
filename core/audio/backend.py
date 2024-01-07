@@ -157,6 +157,10 @@ class AudioManager(AudioBackend):
         self.newline()
         self.get_logger()
         self.check_services()
+        if not self.context:
+            logger.error(self.lf('Missing binary. '\
+                'Please build zynseq library first.'))
+            exit()
         path = None
         if self.context['zynthian']:
             mode = 'zynthian'
@@ -179,11 +183,6 @@ class AudioManager(AudioBackend):
             self.client_name, self.client_name)
         self.seq = None
         self.seq = Sequencer(path_lib=path)
-        if not exists(PATH_LIB):
-            stdout.unmute()
-            self.logger.error(self.lf('Missing zynseq library.'))
-            self.stop()
-            exit()
 
     def start_jack(self):
         try:
