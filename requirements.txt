@@ -1,0 +1,13 @@
+# Audio
+
+JACK-Client==0.5.4
+
+# Bridge
+
+psutil==5.9.7
+watchdog==3.0.0
+pysftp==0.2.9
+
+# Miscellaneous
+
+pyliblo==0.10.0
