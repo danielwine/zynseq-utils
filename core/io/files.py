@@ -36,10 +36,12 @@ def get_context():
     zynthian_root = os.environ.get('ZYNTHIAN_DIR') or ''
     zynthian_path = zynthian_root + '/zynthian-ui/zynlibs/zynseq'
     build_path = '/build/libzynseq.so'
-    local_path = dirname(realpath(__name__))
+    env = os.environ.get('ZYNSEQ_PATH')
+    local_path = env if env else dirname(realpath(__name__))
     zynthian_full_path = zynthian_path + build_path
     local_full_path = local_path + '/core/lib/zynseq/zynseq' + build_path
     if exists(zynthian_full_path):
+        print('exists')
         return {
             'zynthian': True,
             'path_lib': zynthian_path,

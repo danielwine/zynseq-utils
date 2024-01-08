@@ -98,26 +98,39 @@ class AudioBackend():
         else:
             self.engines[0] = JackSamplerNode(
                 'LinuxSampler', 'linuxsampler', debug=self.debug)
-            self.engines[0].launch()
-            sleep(self.delay)
-            self.sampler = LinuxSampler()
-            sleep(self.delay)
-            self.load_samples()
+            try:
+                self.engines[0].launch()
+                sleep(self.delay)
+                self.sampler = LinuxSampler()
+                sleep(self.delay)
+                self.load_samples()
+            except FileNotFoundError:
+                self.logger.warning(self.lf(
+                    '  linuxsampler engine is missing.'))
 
     def stop_engines(self):
         self.logger.info(self.lf('  stopping engines...'))
         for engine in self.engines.values():
-            print(engine.name)
+            if not hasattr(engine, 'process'):
+                return False
+            self.logger.info(self.lf(f'    {engine.name}'))
             engine.process.terminate()
 
     def shutdown_client(self):
-        self.logger.info(self.lf('  deactivating client...'))
-        self.client.deactivate()
-        self.client.close()
+        if self.client:
+            self.logger.info(self.lf('  deactivating client...'))
+            self.client.deactivate()
+            self.client.close()
 
     def connect_all(self):
         if self.debug:
             stdout.unmute()
+        if not self.client:
+            self.logger.warning(
+                self.lf('  zynseq jack client cannot be started.'))
+            self.logger.warning(
+                    self.lf('Creating jack connections failed.'))
+            return False
         try:
             self.systemout.plug(self.sequencer, self.client)
             for engine_id, engine in self.engines.items():
@@ -219,7 +232,8 @@ class AudioManager(AudioBackend):
     def stop(self):
         self.logger.info(self.lf('Shutting down...'))
         # self.disconnect_all()
-        self.seq.transport_stop(self.client_name)
+        if self.client:
+            self.seq.transport_stop(self.client_name)
         self.stop_engines()
         self.shutdown_client()
         # self.seq.destroy()
