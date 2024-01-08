@@ -1,5 +1,4 @@
 from .repl import REPL
-from core.config import PATH_XRNS, PATH_SAMPLES
 from core.audio.backend import AudioManager
 from core.lib.xrns import XRNS
 from core.res.cli_messages import MSG_HEADER, MSG_SERVE
@@ -26,7 +25,8 @@ class CLIApp(REPL):
             init_delay=0.2, verbose=False, debug=self.debug)
         self.audio.initialize()
         self.audio.start()
-        self.set_dir(PATH_SAMPLES, PATH_XRNS)
+        context = self.audio.context
+        self.set_dir(context['path_snapshot'], context['path_xrns'])
 
     def loop(self):
         quit = False

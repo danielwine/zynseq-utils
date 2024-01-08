@@ -41,7 +41,6 @@ def get_context():
     zynthian_full_path = zynthian_path + build_path
     local_full_path = local_path + '/core/lib/zynseq/zynseq' + build_path
     if exists(zynthian_full_path):
-        print('exists')
         return {
             'zynthian': True,
             'path_lib': zynthian_path,

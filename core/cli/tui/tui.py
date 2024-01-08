@@ -117,7 +117,7 @@ class TUIApp(REPL):
     def print_help(self):
         self.win.messages.print(MSG_HEADER, clr=1)
         print('Commands (type help for details):')
-        self.show_help(basic=True)
+        self.show_help(short=True)
 
     def start(self):
         self.audio.initialize()

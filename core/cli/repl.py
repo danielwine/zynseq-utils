@@ -56,20 +56,22 @@ class REPL:
     def mprint(self, data):
         self.print('  ' + ' '.join([key for key in data.keys()]))
 
-    def show_help(self, basic=False):
+    def show_help(self, low_level=False, short=False):
         cmds = {}
-        for method in REPL.__dict__.items():
-            if method[0].startswith('cmd_'):
-                cmds[method[0][4:]] = method[1].__doc__
-        if basic:
+        if short:
             self.mprint(cmds)
             self.mprint(pcmds)
             self.mprint(lcmds)
             return
-        self.pprint(cmds)
-        self.pprint(pcmds)
-        self.print('')
-        self.pprint(lcmds)
+        if not low_level:
+            for method in REPL.__dict__.items():
+                if method[0].startswith('cmd_'):
+                    cmds[method[0][4:]] = method[1].__doc__
+            self.pprint(cmds)
+            self.pprint(pcmds)
+            self.print('Type h+ to list low-level commands.')
+        else:
+            self.pprint(lcmds)
 
     def convert_params(self, par, specs):
         ret = []
@@ -260,6 +262,8 @@ class REPL:
             return False
         if cmd in ['h', 'help']:
             self.show_help()
+        if cmd in ['h+', 'help+']:
+            self.show_help(low_level=True)
         if cmd in ['u', 'usage']:
             self.print(MSG_USAGE)
         if hasattr(self, 'cmd_' + cmd):
