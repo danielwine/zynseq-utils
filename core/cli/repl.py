@@ -210,11 +210,13 @@ class REPL:
 
     def cmd_ports(self, par):
         """list available jack ports"""
-        self.pprint(self.audio.client.get_ports())
+        if self.audio.client:
+            self.pprint(self.audio.client.get_ports())
 
     def cmd_cons(self, par):
         """list jack connections"""
-        self.pprint(self.audio.get_all_connections())
+        if self.audio.client:
+            self.pprint(self.audio.get_all_connections())
 
     def cmd_proc(self, par):
         """list running engines"""

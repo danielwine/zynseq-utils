@@ -27,6 +27,7 @@ class Sequencer(zynseq, SnapshotManager):
         self.pattern = PatternManager(self.libseq)
         if scan:
             self.get_statistics()
+        self.pattern.select(self.libseq.getPatternAt(1, 0, 0, 0))
 
     def import_project(self, file_name, tracker_project):
         self.tracker = tracker_project
@@ -202,14 +203,14 @@ class Sequencer(zynseq, SnapshotManager):
         time.sleep(delay)
 
     def test_midi(self, print_fn=print):
-        print_fn(f'Testing drum channnel')
-        self.play_note(40, 0, 0.2)
-        self.play_note(45, 0, 0.2)
-        for channel in range(1, 4):
-            print_fn(f'Testing channnel {channel}')
+        for channel in range(0, 4):
+            print_fn(f'Testing channnel #{channel + 1}')
             self.play_note(62, channel, 0.2)
             self.play_note(69, channel, 0.2)
             self.play_note(74, channel, 0.4)
+        print_fn(f'Testing drum channnel #10')
+        self.play_note(40, 9, 0.2)
+        self.play_note(45, 9, 0.2)
 
     def load_file(self, path, filename, **args):
         self.file = filename.split(".")[0]
