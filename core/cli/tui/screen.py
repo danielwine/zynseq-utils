@@ -75,7 +75,7 @@ class Window:
             self.win.idlok(True)
         self.set_background(kwargs['clr'])
         self.active_line = 0
-        self.active_row = 0
+        self.active_col = 0
         self.height = kwargs['height']
         self.width = kwargs['width']
         self.clr = kwargs['clr']
@@ -98,11 +98,11 @@ class Window:
     def move(self, y, x):
         self.win.move(y, x)
         self.active_line = y
-        self.active_row = x
+        self.active_col = x
 
     def move_pos_back(self):
-        if self.active_row > 2:
-            self.move(self.active_line, self.active_row-1)
+        if self.active_col > 2:
+            self.move(self.active_line, self.active_col-1)
 
     def backspace(self):
         self.move_pos_back()
@@ -112,13 +112,13 @@ class Window:
     def clear(self):
         self.win.erase()
         self.active_line = 0
-        self.active_row = 0
+        self.active_col = 0
         self.win.refresh()
 
     def write(self, char, move=True):
         self.win.addch(char)
         if move:
-            self.active_row += 1
+            self.active_col += 1
         self.win.refresh()
 
     def draw_separator(self):
@@ -149,7 +149,7 @@ class Window:
         msg = str(msg)
         if x == 0 and y == 0:
             y = self.active_line
-            x = self.active_row
+            x = self.active_col
         if y < 0 or y > curses.LINES or x < 0 or x > curses.COLS:
             return
         if x + len(msg) > curses.COLS:
@@ -169,7 +169,7 @@ class Window:
 
         if not clr:
             clr = CLR.CLR_LOG1
-        self.active_row += len(msg)
+        self.active_col += len(msg)
         maxy, maxx = self.win.getmaxyx()
         try:
             self.win.addstr(y, x, s, curses.color_pair(clr))
@@ -178,10 +178,10 @@ class Window:
         if self.active_line + 1 == maxy and self.height > 1:
             if self.scrollable:
                 self.win.scroll()
-                self.active_row = 0
+                self.active_col = 0
         elif end == '\n':
             self.active_line += 1
-            self.active_row = 0
+            self.active_col = 0
             self.win.move(self.active_line-1, 0)
         self.win.refresh()
 

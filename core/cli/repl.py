@@ -4,6 +4,7 @@ from os.path import isfile, join, splitext
 from os import listdir, getcwd
 from core.io.files import get_files, get_first_file
 from core.audio.utils import is_port, format_port
+from core.audio.manipulator import Manipulator
 from core.res.cli_zynseqcmds import pcmds, lcmds
 from core.res.cli_messages import MSG_USAGE, ERR_INVALID, ERR_MISSING_ARG
 
@@ -56,19 +57,27 @@ class REPL:
     def mprint(self, data):
         self.print('  ' + ' '.join([key for key in data.keys()]))
 
-    def show_help(self, low_level=False, short=False):
+    def get_docstrings_for(self, cls, startswith=''):
         cmds = {}
+        for method in cls.__dict__.items():
+            if method[0].startswith('_'):
+                continue
+            if method[0].startswith(startswith):
+                cmds[method[0][len(startswith):]] = method[1].__doc__
+        return cmds
+
+    def show_help(self, low_level=False, short=False):
+        cmds_repl = self.get_docstrings_for(REPL, 'cmd_')
+        cmds_man = self.get_docstrings_for(Manipulator)
         if short:
-            self.mprint(cmds)
+            self.mprint(cmds_repl)
             self.mprint(pcmds)
-            self.mprint(lcmds)
+            self.mprint(cmds_man)
             return
         if not low_level:
-            for method in REPL.__dict__.items():
-                if method[0].startswith('cmd_'):
-                    cmds[method[0][4:]] = method[1].__doc__
-            self.pprint(cmds)
+            self.pprint(cmds_repl)
             self.pprint(pcmds)
+            self.pprint(cmds_man)
             self.print('Type h+ to list low-level commands.')
         else:
             self.pprint(lcmds)
@@ -192,7 +201,7 @@ class REPL:
                 self.print(ret)
 
     def cmd_test(self, par):
-        """plays midi notes to test audio channels"""
+        """play midi notes to test audio channels"""
         self.audio.seq.test_midi(self.print)
 
     def cmd_dir(self, par):
@@ -242,8 +251,8 @@ class REPL:
         """stop transport"""
         return self.audio.seq.transport_stop('zt')
 
-    def check_events(self, cmd):
-        if cmd == 'sp':
+    def check_events(self, cmd, redraw=False):
+        if cmd == 'sp' or redraw:
             self.call_event_callback('pattern_changed')
 
     def print_newline_on(self, item_number):
@@ -257,6 +266,7 @@ class REPL:
 
     def evaluate(self, res):
         success = True
+        force_redraw = False
         rsplit = res.split(' ')
         cmd = rsplit[0]
         par = rsplit[1:] if len(rsplit) > 1 else ''
@@ -271,10 +281,15 @@ class REPL:
         if hasattr(self, 'cmd_' + cmd):
             self.print('')
             getattr(self, 'cmd_' + cmd)(par)
-        if cmd in lcmds:
+            return True
+        elif hasattr(self.audio.seq.man, cmd):
+            getattr(self.audio.seq.man, cmd)(par)
+            force_redraw = True
+        elif cmd in lcmds:
             success = self.parse_libcmds(cmd, par)
-            self.check_events(cmd)
-        if cmd in pcmds:
+        elif cmd in pcmds:
             success = self.parse_pycmds(cmd, par)
-            self.check_events(cmd)
+        else:
+            return
+        self.check_events(cmd, redraw=force_redraw)
         return True

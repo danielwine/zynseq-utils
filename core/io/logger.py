@@ -1,4 +1,5 @@
 import __main__
+import sys
 import logging
 from core.cli.colors import Col
 
@@ -15,12 +16,16 @@ class LoggerFactory:
     def __new__(cls, name):
         cls.name = name
         exec = __main__.__file__.split('/')[-1]
+        tui_mode = '--tui' in sys.argv
         if exec == 'gui.py':
             ln = cls.getName(cls)
             return cls.getKivyLogger(cls), lambda x: f'{ln}: {x}'
         else:
             ln = cls.getName(cls)
-            return cls.getDefaultLogger(cls, name), lambda x: x
+            if tui_mode:
+                return cls.getCursesLogger(cls, name), lambda x: x
+            else:
+                return cls.getDefaultLogger(cls, name), lambda x: x
 
     def getName(cls):
         return cls.name.split('.')[-1].capitalize()
@@ -33,6 +38,10 @@ class LoggerFactory:
         ch.setFormatter(SimpleColorFormatter())
         logger.addHandler(ch)
         return logger
+
+    def getCursesLogger(cls, name):
+        import logging
+        return logging.getLogger(name)
 
     def getKivyLogger(cls):
         from kivy.logger import Logger
@@ -92,6 +101,7 @@ class CursesHandler(logging.Handler):
                     screen.addstr(fs % msg.encode("UTF-8"))
                     screen.refresh()
             self.win.active_line += 1
+            self.win.active_col = 0
         except (KeyboardInterrupt, SystemExit):
             raise
         except:

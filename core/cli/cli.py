@@ -1,7 +1,7 @@
 from .repl import REPL
 from core.audio.backend import AudioManager
 from core.lib.xrns import XRNS
-from core.res.cli_messages import MSG_HEADER, MSG_SERVE
+from core.res.cli_messages import MSG_HEADER, MSG_HELP_MIN, MSG_SERVE
 from core.io.logger import LoggerFactory
 
 logger, lf = LoggerFactory(__name__)
@@ -14,6 +14,7 @@ class CLIApp(REPL):
         self.xrns = XRNS()
         if not silent:
             print(MSG_HEADER)
+            logger.info(MSG_HELP_MIN)
         else:
             print(MSG_SERVE)
             print(MSG_HEADER.split('\n')[1])
@@ -38,7 +39,7 @@ class CLIApp(REPL):
                 res = prev_res
             else:
                 prev_res = res
-            if not self.evaluate(res):
+            if self.evaluate(res) == False:
                 quit = True
         self.stop()
 

@@ -8,7 +8,7 @@ from core.io.logger import CursesHandler
 from core.audio.backend import AudioManager
 from core.lib.tracker import Note
 from core.lib.xrns import XRNS
-from core.res.cli_messages import MSG_HEADER
+from core.res.cli_messages import MSG_HEADER, MSG_HELP_MIN
 
 messageWindow = None
 ctrl_c_was_pressed = False
@@ -115,8 +115,9 @@ class TUIApp(REPL):
         self.register_events()
 
     def print_help(self):
-        self.win.messages.print(MSG_HEADER, clr=1)
-        print('Commands (type help for details):')
+        for line in MSG_HEADER.split('\n'):
+            self.win.messages.print(line, clr=1)
+        self.win.messages.print(MSG_HELP_MIN)
         self.show_help(short=True)
 
     def start(self):
@@ -125,8 +126,8 @@ class TUIApp(REPL):
                      self.audio.context['path_xrns'])
 
         self.win.refresh_all()
-        self.win.console.focus(2)
         self.audio.start()
+        self.win.console.focus(2)
         self.initialize_renderers()
         self.win.refresh_all()
         self.win.console.focus(2)
@@ -171,7 +172,7 @@ class TUIApp(REPL):
                     res = self.win.console.win.instr(0, 2).decode('utf-8')
                     self.win.console.clear()
                     self.win.console.print('> ', end='')
-                    if not self.evaluate(res):
+                    if self.evaluate(res) == False:
                         break
                     self.win.console.focus(2)
                 elif code == 24 or code == curses.KEY_F10:

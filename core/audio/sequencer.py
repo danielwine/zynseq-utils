@@ -10,7 +10,7 @@ from core.io.logger import LoggerFactory
 from core.lib.tracker import Note, TrackerPattern
 from core.lib.zss import SnapshotManager
 from core.lib.zynseq.zynseq.zynseq import zynseq
-from core.audio.generator import Generator
+from core.audio.manipulator import Manipulator
 
 basepath = dirname(realpath(__file__))
 logger, lf = LoggerFactory(__name__)
@@ -19,6 +19,7 @@ logger, lf = LoggerFactory(__name__)
 class Sequencer(zynseq, SnapshotManager):
     def __init__(self, path_lib = None):
         super().__init__(path=path_lib)
+        self.man = Manipulator(self.libseq)
         self.filepath = ""
         self.file = ""
 
@@ -28,6 +29,7 @@ class Sequencer(zynseq, SnapshotManager):
         if scan:
             self.get_statistics()
         self.pattern.select(self.libseq.getPatternAt(1, 0, 0, 0))
+        self.libseq.togglePlayState(1, 0)
 
     def import_project(self, file_name, tracker_project):
         self.tracker = tracker_project
@@ -235,9 +237,9 @@ class Sequencer(zynseq, SnapshotManager):
         self.libseq.setPlayState(1, 0)
 
 
-class PatternManager(Generator):
+class PatternManager():
     def __init__(self, libseq) -> None:
-        super().__init__(libseq)
+        self.libseq = libseq
         self.id = 0
         self.tonic = 0
 
