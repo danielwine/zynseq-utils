@@ -32,7 +32,7 @@ Experimental command line interface for managing zss and xrns files.
 ### Usage
 
 `python cli.py`
-`python cli.py --tui`
+`python cli.py --simple`
 
 ### Notes
 

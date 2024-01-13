@@ -147,6 +147,7 @@ class Window:
               pad=None, pad_chr=None, clr=0):
         clr = self.clr if clr == 0 else clr
         msg = str(msg)
+        msg += end if not end == '\n' else ''
         if x == 0 and y == 0:
             y = self.active_line
             x = self.active_col

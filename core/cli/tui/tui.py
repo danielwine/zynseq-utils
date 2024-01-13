@@ -9,6 +9,7 @@ from core.audio.backend import AudioManager
 from core.lib.tracker import Note
 from core.lib.xrns import XRNS
 from core.res.cli_messages import MSG_HEADER, MSG_HELP_MIN
+from core.res.cli_zynseqcmds import menu
 
 messageWindow = None
 ctrl_c_was_pressed = False
@@ -82,11 +83,11 @@ class TUIApp(REPL):
         win.add_get_data_cb(get_seq, namespace, method)
 
     def initialize_menu(self):
-        menu = {}
         menu_line = '  '
         for key, name in menu.items():
-            menu_line += f'{key} {name}   '
-        self.win.footer.print(menu_line)
+            menu_line = f'{key} {name}'
+            clr = 1 if key == 'F1' else 0
+            self.win.footer.print(menu_line, end = '   ', clr=clr)
 
     def initialize_windows(self):
         def get_audio():
@@ -97,9 +98,9 @@ class TUIApp(REPL):
         self.win.console.write('>')
         self.win.sequences.header = 'SCENE {.bank}'
         self.win.window2.header = 'PATTERN {pattern.id}'
+        self.add_data_cb(self.win.status, '', 'statistics')
         self.win.status2.add_get_data_cb(
             get_audio, '', 'audio_status')
-        self.add_data_cb(self.win.status, '', 'statistics')
         self.add_data_cb(self.win.sequences, '', 'get_props_of_sequences')
         self.add_data_cb(self.win.window2, 'pattern', 'info')
         self.add_data_cb(self.win.pattern, 'pattern', 'notes')
@@ -195,5 +196,7 @@ class TUIApp(REPL):
             self.screen.scr = None
 
     def stop(self):
+        self.win.console.focus(2)
+        curses.curs_set(0)
         self.audio.stop()
         curses.endwin()

@@ -16,13 +16,13 @@ class LoggerFactory:
     def __new__(cls, name):
         cls.name = name
         exec = __main__.__file__.split('/')[-1]
-        tui_mode = '--tui' in sys.argv
+        simple_mode = '--simple' in sys.argv or '--serve' in sys.argv
         if exec == 'gui.py':
             ln = cls.getName(cls)
             return cls.getKivyLogger(cls), lambda x: f'{ln}: {x}'
         else:
             ln = cls.getName(cls)
-            if tui_mode:
+            if not simple_mode:
                 return cls.getCursesLogger(cls, name), lambda x: x
             else:
                 return cls.getDefaultLogger(cls, name), lambda x: x

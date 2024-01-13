@@ -29,8 +29,7 @@ def main():
         debug = True
 
     serve = True if '--serve' in sys.argv else False
-    # sys.argv[0] = '--tui'
-    if '--tui' not in sys.argv:
+    if '--simple' in sys.argv or '--serve' in sys.argv:
         from core.cli.cli import CLIApp
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
@@ -44,7 +43,11 @@ def main():
                 cli.stop()
             cli.stop()
         else:
-            cli.loop()
+            try:
+                cli.loop()
+            except KeyboardInterrupt:
+                print()
+                cli.stop()
     else:
         import signal
         import io

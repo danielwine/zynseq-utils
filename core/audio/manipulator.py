@@ -17,8 +17,8 @@ class Manipulator:
     def mov(self, dst):
         """copy current pattern to destination"""
         db, ds = self._decode(dst)
-        dt = self.libseq.getPatternAt(db, ds, 0, 0)
-        # self.libseq.copyPattern(uint32_t source, uint32_t destination)
+        dp = self.libseq.getPatternAt(db, ds, 0, 0)
+        self.libseq.copyPattern(self.libseq.getPatternIndex(), dp)
 
     def shl(self, off):
         """shift pattern content left by x"""

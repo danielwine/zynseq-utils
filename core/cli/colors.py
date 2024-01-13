@@ -40,6 +40,7 @@ def set_colors():
         curses.init_pair(5, 2, 0)
         curses.init_pair(6, 0, 1)
         curses.init_pair(7, 6, 0)
+        curses.init_pair(8, 0, 7)
 
         # highlight colors
         curses.init_pair(10, 0, 2)

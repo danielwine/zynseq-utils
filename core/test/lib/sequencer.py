@@ -3,7 +3,7 @@ import json
 from core.io.logger import LoggerFactory
 from core.config import PATH_LIB
 from core.audio.backend import AudioManager
-from core.audio.generator import Generator
+from core.audio.manipulator import Manipulator
 logger, lf = LoggerFactory(__name__)
 
 CONFIG_ROOT = PATH_LIB + "/.."
@@ -22,13 +22,13 @@ class ZynBase:
         self.audio.initialize()
         self.audio.start()
         self.audio.seq.transport_start('client')    # custom
-        self.generator = Generator(self.audio.seq.libseq)
+        self.man = Manipulator(self.audio.seq.libseq)
 
     def populate_pattern(self, bank_num, seq_num): 
         seq = self.audio.seq
         pattern_num = seq.libseq.getPatternAt(bank_num, seq_num, 0, 0)
         seq.libseq.selectPattern(pattern_num)
-        self.generator.generate()
+        self.man.gen([])
     
     def get_info_bank(self, bank_num):
         self.audio.seq.select_bank(bank_num)

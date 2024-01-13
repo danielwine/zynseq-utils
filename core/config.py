@@ -3,7 +3,6 @@ from os.path import dirname, abspath
 # General settings
 
 debug_mode = False         # debug messages are hidden when turned off
-
 autorun_jack = True        # should start jack if it's not already running
 
 # Constants
