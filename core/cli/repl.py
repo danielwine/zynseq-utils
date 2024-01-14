@@ -1,13 +1,9 @@
-
-import time
-from os.path import isfile, join, splitext
-from os import listdir, getcwd
 from core.io.files import get_files, get_first_file
 from core.audio.utils import is_port, format_port
 from core.audio.manipulator import Manipulator
 from core.res.cli_zynseqcmds import pcmds, lcmds
-from core.res.cli_messages import MSG_USAGE, ERR_INVALID, ERR_MISSING_ARG
-
+from core.res.cli_messages import MSG_USAGE
+from .params import *
 
 class REPL:
 
@@ -57,18 +53,9 @@ class REPL:
     def mprint(self, data):
         self.print('  ' + ' '.join([key for key in data.keys()]))
 
-    def get_docstrings_for(self, cls, startswith=''):
-        cmds = {}
-        for method in cls.__dict__.items():
-            if method[0].startswith('_'):
-                continue
-            if method[0].startswith(startswith):
-                cmds[method[0][len(startswith):]] = method[1].__doc__
-        return cmds
-
     def show_help(self, low_level=False, short=False):
-        cmds_repl = self.get_docstrings_for(REPL, 'cmd_')
-        cmds_man = self.get_docstrings_for(Manipulator)
+        cmds_repl = get_docstrings_for(REPL, 'cmd_')
+        cmds_man = get_docstrings_for(Manipulator)
         if short:
             self.mprint(cmds_repl)
             self.mprint(pcmds)
@@ -81,48 +68,6 @@ class REPL:
             self.print('Type h+ to list low-level commands.')
         else:
             self.pprint(lcmds)
-
-    def convert_params(self, par, specs):
-        ret = []
-        for num, typ in enumerate(specs):
-            if typ == 'i':
-                if par[num].isnumeric():
-                    ret.append(int(par[num]))
-                else:
-                    self.print_newline_on(1)
-                    self.print(f'{ERR_INVALID}: numeric')
-                    return False
-            if typ == 'b':
-                nm = int(par[num])
-                if nm >= 0 and nm < 2:
-                    ret.append(False if nm == 0 else True)
-                else:
-                    self.print(f'{ERR_INVALID}: boolean')
-                    return False
-        return ret
-
-    def invoke_lib_function(self, fn, specs, p):
-        if len(p) < len(specs):
-            arg = specs[len(p)]
-            self.print(f'{ERR_MISSING_ARG}: {arg}')
-            return False
-        p = self.convert_params(p, specs)
-        if p == None or p == False:
-            return False
-        lp = len(p)
-        if lp == 0:
-            r = fn()
-        if lp == 1:
-            r = fn(p[0])
-        elif lp == 2:
-            r = fn(p[0], p[1])
-        elif lp == 3:
-            r = fn(p[0], p[1], p[2])
-        elif lp == 4:
-            r = fn(p[0], p[1], p[2], p[3])
-        elif lp == 5:
-            r = fn(p[0], p[1], p[2], p[3], p[4])
-        return r
 
     def load(self, par):
         if not par:
@@ -168,7 +113,7 @@ class REPL:
         fname = fnsplit[0]
         try:
             func = getattr(self.audio.seq.libseq, fname)
-            ret = self.invoke_lib_function(func, fnsplit[1:], par)
+            ret = invoke_c_func(func, fnsplit[1:], par)
             if ret:
                 self.print(ret)
             else:
@@ -180,7 +125,7 @@ class REPL:
         fnsplit = pcmds[cmd].split()
         fname = fnsplit[0]
         func = getattr(self.audio.seq, fname)
-        par = self.convert_params(par, fnsplit[1:])
+        par = convert_params(par, fnsplit[1:])
         if par is False:
             return False
         if len(fnsplit) == 1:
@@ -267,7 +212,7 @@ class REPL:
     def evaluate(self, res):
         success = True
         force_redraw = False
-        rsplit = res.split(' ')
+        rsplit = res.strip().split(' ')
         cmd = rsplit[0]
         par = rsplit[1:] if len(rsplit) > 1 else ''
         if cmd in ['x', 'exit', 'quit']:
@@ -283,7 +228,11 @@ class REPL:
             getattr(self, 'cmd_' + cmd)(par)
             return True
         elif hasattr(self.audio.seq.man, cmd):
-            getattr(self.audio.seq.man, cmd)(par)
+            func = getattr(self.audio.seq.man, cmd)
+            fnparc = get_fn_param_count(func)
+            ret, parst = invoke_mnemo_func(func, fnparc, par)
+            if ret:
+                self.print(f'{cmd.upper()} {parst} OK')
             force_redraw = True
         elif cmd in lcmds:
             success = self.parse_libcmds(cmd, par)

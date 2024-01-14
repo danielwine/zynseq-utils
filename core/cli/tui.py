@@ -3,7 +3,7 @@ import curses
 from sys import stdout
 from .screen import Screen, WindowManager
 from .layout import get_layout
-from ..repl import REPL
+from .repl import REPL
 from core.io.logger import CursesHandler
 from core.audio.backend import AudioManager
 from core.lib.tracker import Note

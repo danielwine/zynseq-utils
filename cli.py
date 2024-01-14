@@ -52,7 +52,7 @@ def main():
         import signal
         import io
         import curses
-        from core.cli.tui.tui import ctrl_c_handler, TUIApp
+        from core.cli.tui import ctrl_c_handler, TUIApp
         sys.stdout = io.StringIO()
         sys.stderr = io.StringIO()
         signal.signal(signal.SIGINT, ctrl_c_handler)
