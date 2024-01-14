@@ -1,6 +1,6 @@
 import __main__
-import sys
 import logging
+from cli import get_modes
 from core.cli.colors import Col
 
 # logging.basicConfig(format='%(message)s', level=logging.INFO)
@@ -16,13 +16,13 @@ class LoggerFactory:
     def __new__(cls, name):
         cls.name = name
         exec = __main__.__file__.split('/')[-1]
-        simple_mode = '--simple' in sys.argv or '--serve' in sys.argv
         if exec == 'gui.py':
             ln = cls.getName(cls)
             return cls.getKivyLogger(cls), lambda x: f'{ln}: {x}'
         else:
             ln = cls.getName(cls)
-            if not simple_mode:
+            simple, _ = get_modes()
+            if not simple:
                 return cls.getCursesLogger(cls, name), lambda x: x
             else:
                 return cls.getDefaultLogger(cls, name), lambda x: x

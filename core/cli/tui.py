@@ -183,7 +183,8 @@ class TUIApp(REPL):
                 # elif c == curses.KEY_DOWN:
                 #     self.win.messages.print('DOWN')
                 elif (code >= 48 and code <= 57) or (
-                        (code >= 97 and code <= 122)) or code == 32:
+                        (code >= 97 and code <= 122)) or (
+                            code in [43, 32]):
                     self.win.console.write(chr(code))
                 # elif code != -1:
                 #     self.win.messages.print(code)

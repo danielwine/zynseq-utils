@@ -1,7 +1,7 @@
 
 pcmds = {
     'lb': 'list_banks',
-    'ls': 'sequence_names',
+    # 'ls': 'sequence_names',
     'lp': 'list_patterns',
     'sb': 'select_bank i',
     'sp': 'select_pattern i',

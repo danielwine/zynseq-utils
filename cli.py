@@ -1,6 +1,14 @@
 import sys
 import core.config as cfg
+from os import get_terminal_size
 from core.cli.colors import Col
+
+
+def get_modes():
+    serve = True if '--serve' in sys.argv else False
+    simple = get_terminal_size().lines < 40 or (
+             '--simple' in sys.argv or serve)
+    return simple, serve
 
 def capture_stream(stream):
     try:
@@ -28,8 +36,8 @@ def main():
     if 'debug' in sys.argv or '--debug' in sys.argv:
         debug = True
 
-    serve = True if '--serve' in sys.argv else False
-    if '--simple' in sys.argv or '--serve' in sys.argv:
+    simple, serve = get_modes()
+    if simple:
         from core.cli.cli import CLIApp
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
